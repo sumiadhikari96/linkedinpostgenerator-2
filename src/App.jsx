@@ -40,7 +40,7 @@ export default function App() {
   const [apiKey, setApiKey] = useState(() => storage.get('gemini_api_key') || '')
   const [rememberKey, setRememberKey] = useState(() => !!storage.get('gemini_api_key'))
   const [showKey, setShowKey] = useState(false)
-  const [model, setModel] = useState(() => storage.get('gemini_model') || MODELS[0].id)
+  const [model, setModel] = useState(() => storage.get('gemini_model_v2') || MODELS[0].id)
 
   const [topic, setTopic] = useState('')
   const [tone, setTone] = useState('Professional')
@@ -50,12 +50,14 @@ export default function App() {
 
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(false)
+  const [usedModel, setUsedModel] = useState('')
+  const [status, setStatus] = useState('')
   const [error, setError] = useState('')
   const [toast, setToast] = useState('')
   const resultsRef = useRef(null)
 
   useEffect(() => storage.set('gemini_api_key', rememberKey && apiKey ? apiKey : null), [apiKey, rememberKey])
-  useEffect(() => storage.set('gemini_model', model), [model])
+  useEffect(() => storage.set('gemini_model_v2', model), [model])
 
   const canGenerate = apiKey.trim() && topic.trim() && !loading
 
@@ -68,12 +70,19 @@ export default function App() {
     setPosts([])
     setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
     try {
-      const result = await generatePosts({ apiKey: apiKey.trim(), model: model.trim(), topic, tone, length, profession, extras })
-      setPosts(result)
+      const result = await generatePosts({
+        apiKey: apiKey.trim(),
+        model: model.trim(),
+        topic, tone, length, profession, extras,
+        onFallback: (id) => setStatus(`Busy or rate limited, trying ${labelFor(id)}…`),
+      })
+      setPosts(result.posts)
+      setUsedModel(result.model)
     } catch (err) {
       setError(err.message || 'Something went wrong.')
     } finally {
       setLoading(false)
+      setStatus('')
     }
   }
 
@@ -244,7 +253,7 @@ export default function App() {
             <span className="shine" />
             {loading ? (
               <>
-                <span className="spinner" /> Crafting your posts…
+                <span className="spinner" /> {status || 'Crafting your posts…'}
               </>
             ) : (
               <>✨ Generate 3 posts</>
@@ -255,6 +264,12 @@ export default function App() {
         <section className="results" ref={resultsRef}>
           {!loading && !posts.length && <EmptyState />}
           {loading && [0, 1, 2].map((i) => <Skeleton key={i} i={i} />)}
+          {!loading && usedModel && posts.length > 0 && (
+            <div className="used-model">
+              Written by <strong>{labelFor(usedModel)}</strong>
+              {usedModel !== model.trim() && <span> · switched automatically because {labelFor(model.trim())} hit a limit</span>}
+            </div>
+          )}
           {!loading &&
             posts.map((p, i) => (
               <PostCard key={i} post={p} index={i} profession={profession} onCopied={() => flash('Copied to clipboard 🎉')} />
@@ -274,6 +289,10 @@ export default function App() {
       <div className={`toast ${toast ? 'show' : ''}`} role="status">{toast}</div>
     </div>
   )
+}
+
+function labelFor(id) {
+  return MODELS.find((m) => m.id === id)?.label || id
 }
 
 function EmptyState() {

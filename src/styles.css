@@ -293,3 +293,10 @@ input::placeholder, textarea::placeholder { color: #6e6e8f; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
 }
+
+.used-model {
+  align-self: flex-start; font-size: 13px; color: var(--muted);
+  padding: 7px 14px; border-radius: 999px; background: var(--panel); border: 1px solid var(--border);
+  animation: rise 0.5s both;
+}
+.used-model strong { color: var(--text); }
