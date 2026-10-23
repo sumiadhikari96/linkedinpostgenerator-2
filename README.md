@@ -3,7 +3,7 @@
 Enter a topic, tone, length and your profession, and get **3 distinct LinkedIn post options** from Google's latest Gemini models.
 
 - 🔑 **Bring your own key**: you enter your Gemini API key in the UI. It goes straight from your browser to Google and never passes through a backend. You can choose to remember it on your device.
-- 🧠 **Latest models**: defaults to `gemini-4-argon`, with `gemini-3.8-flash` and `gemini-3.5-flash-lite` as one-click options. You can also type any model id under *Advanced options*.
+- 🧠 **Models**: defaults to `gemini-3.8-flash`, which works on free keys. If it hits a rate limit the app switches to `gemini-3.5-flash-lite` on its own. `gemini-4-argon` (newest) is available for billing-enabled keys, and you can type any model id under *Advanced options*.
 - ✨ The UI has an animated aurora background, glass cards, gradient tone chips, a sliding length control, loading skeletons, and post previews styled like LinkedIn.
 - 📋 Copy a post with one click, or **Post on LinkedIn**, which copies the post and opens the LinkedIn composer.
 
